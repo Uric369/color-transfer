@@ -32,7 +32,7 @@ class ColorTransfer:
             self.rotation_matrices = Rotations.random_rotations(m, c=c)
         self.RG = Regrain()
 
-    def lab_transfer(self, img_arr_in=None, img_arr_ref=None):
+    def lab_transfer(self, img_arr_in=None, img_arr_ref=None, target=None):
         """Convert img from rgb space to lab space, apply mean std transfer,
         then convert back.
         Args:
@@ -41,7 +41,15 @@ class ColorTransfer:
         Returns:
             img_arr_out: transfered bgr numpy array of input image.
         """
-        lab_in = cv2.cvtColor(img_arr_in, cv2.COLOR_BGR2LAB)
+        if target == "leaf":
+            lab_in = cv2.cvtColor(img_arr_in, cv2.COLOR_BGR2LAB)
+        elif target == "trunk":
+            # 首先将其转换为 CV_8U (8位无符号整型)
+            img_arr_in_8u = (img_arr_in / 256).astype(np.uint8)  # 将16位数据缩放到8位
+
+            # 现在可以转换颜色空间了
+            lab_in = cv2.cvtColor(img_arr_in_8u, cv2.COLOR_BGR2LAB)
+
         lab_ref = cv2.cvtColor(img_arr_ref, cv2.COLOR_BGR2LAB)
         lab_out = self.mean_std_transfer(img_arr_in=lab_in,
                                          img_arr_ref=lab_ref)
